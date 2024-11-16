@@ -1,0 +1,41 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Detalle de Venta
+      <button class="btn btn-warning right-btn" (click)="generarPDF()">Generar PDF</button>
+    </h3>
+
+  </div>
+  <div class="card-body">
+    <table class="table table-borderless">
+      <tr>
+        <th>ID:</th>
+        <td>{{ venta.folio }}</td>
+      </tr>
+      <tr>
+        <th>Folio:</th>
+        <td>{{ venta.folio }}</td>
+      </tr>
+      <tr>
+        <th>Productos:</th>
+        <td>
+          <ul class="list-unstyled">
+            <li *ngFor="let producto of venta.productos">
+              {{ producto.nombre }} - {{ producto.precio | currency }} (Cantidad: {{ producto.cantidad }})
+            </li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Cantidad Total:</th>
+        <td>{{ cantidadTotal }}</td>
+      </tr>
+      <tr>
+        <th>Total a Pagar:</th>
+        <td>{{ venta.monto | currency }}</td>
+      </tr>
+
+    </table>
+    
+  </div>
+  
+</div>

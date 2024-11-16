@@ -1,0 +1,118 @@
+<div class="container">
+    <h2>Lista de Productos</h2>
+    <button class="btn btn-primary mb-3" (click)="abrirModalAgregar()">Agregar Producto</button>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Clave</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Precio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let producto of productos; let i = index">
+          <td>{{ producto.clave }}</td>
+          <td>{{ producto.nombre }}</td>
+          <td>{{ producto.descripcion }}</td>
+          <td>{{ producto.precio | currency }}</td>
+          <td>
+            <button class="btn btn-primary btn-sm me-2" (click)="abrirModalEditar(i)">Editar</button>
+            <button class="btn btn-danger btn-sm" (click)="abrirModalEliminar(i)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Modal Agregar Producto -->
+  <div class="modal fade" tabindex="-1" role="dialog" [ngClass]="{'show': modalAgregarAbierto, 'd-block': modalAgregarAbierto}" *ngIf="modalAgregarAbierto">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Agregar Producto</h5>
+          <button type="button" class="btn-close" (click)="cerrarModalAgregar()"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="agregarProducto()" #productoForm="ngForm">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre:</label>
+              <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="productoSeleccionado.nombre" required>
+            </div>
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción:</label>
+              <textarea class="form-control" id="descripcion" name="descripcion" [(ngModel)]="productoSeleccionado.descripcion" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio:</label>
+                <input type="text" class="form-control" id="precio" name="precio" [(ngModel)]="productoSeleccionado.precio" required pattern="^\d+(\.\d{1,2})?$" appPrecioFormatter>
+                <div *ngIf="productoForm.controls['precio']?.invalid && (productoForm.controls['precio']?.dirty || productoForm.controls['precio']?.touched)">
+                  <small class="text-danger" *ngIf="productoForm.controls['precio']?.errors?.['required']">El precio es obligatorio.</small>
+                  <small class="text-danger" *ngIf="productoForm.controls['precio']?.errors?.['pattern']">El precio debe tener máximo dos decimales.</small>
+                </div>
+              </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="cerrarModalAgregar()">Cancelar</button>
+              <button type="submit" class="btn btn-primary" [disabled]="productoForm.invalid">Agregar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Editar Producto -->
+  <div class="modal fade" tabindex="-1" role="dialog" [ngClass]="{'show': modalEditarAbierto, 'd-block': modalEditarAbierto}" *ngIf="modalEditarAbierto">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Producto</h5>
+          <button type="button" class="btn-close" (click)="cerrarModalEditar()"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="actualizarProducto()" #productoForm="ngForm">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre:</label>
+              <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="productoSeleccionado.nombre" required>
+            </div>
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción:</label>
+              <textarea class="form-control" id="descripcion" name="descripcion" [(ngModel)]="productoSeleccionado.descripcion" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio:</label>
+                <input type="text" class="form-control" id="precio" name="precio" [(ngModel)]="productoSeleccionado.precio" required pattern="^\d+(\.\d{1,2})?$" appPrecioFormatter>
+                <div *ngIf="productoForm.controls['precio']?.invalid && (productoForm.controls['precio']?.dirty || productoForm.controls['precio']?.touched)">
+                  <small class="text-danger" *ngIf="productoForm.controls['precio']?.errors?.['required']">El precio es obligatorio.</small>
+                  <small class="text-danger" *ngIf="productoForm.controls['precio']?.errors?.['pattern']">El precio debe tener máximo dos decimales.</small>
+                </div>
+              </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="cerrarModalEditar()">Cancelar</button>
+              <button type="submit" class="btn btn-primary" [disabled]="productoForm.invalid">Actualizar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Eliminar Producto -->
+  <div class="modal fade" tabindex="-1" role="dialog" [ngClass]="{'show': modalEliminarAbierto, 'd-block': modalEliminarAbierto}" *ngIf="modalEliminarAbierto">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar Producto</h5>
+          <button type="button" class="btn-close" (click)="cerrarModalEliminar()"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas eliminar el producto "{{ productoSeleccionado.nombre }}"?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalEliminar()">Cancelar</button>
+          <button type="button" class="btn btn-danger" (click)="eliminarProducto()">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>

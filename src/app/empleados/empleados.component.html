@@ -1,0 +1,182 @@
+<div class="container">
+  <h2>Lista de Empleados</h2>
+  <button class="btn btn-primary mb-3" (click)="abrirModalAgregar()">Agregar Empleado</button>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Apellido Paterno</th>
+        <th>Apellido Materno</th>
+        <th>RFC</th>
+        <th>Fecha de Nacimiento</th>
+        <th>CURP</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let empleado of empleados; let i = index" [ngClass]="{'font-weight-bold': true}">
+        <td>{{ empleado.nombre }}</td>
+        <td>{{ empleado.apPaterno }}</td>
+        <td>{{ empleado.apMaterno }}</td>
+        <td>{{ empleado.rfc }}</td>
+        <td>{{ empleado.fechaNacimiento | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ empleado.curp }}</td>
+        <td class="d-flex">
+          <button class="btn btn-primary btn-sm me-2" (click)="abrirModalEditar(i)">Editar</button>
+          <button class="btn btn-danger btn-sm" (click)="abrirModalEliminar(i)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+  
+  <!-- Modal Agregar Empleado -->
+  <div class="modal fade" tabindex="-1" role="dialog" [ngClass]="{'show': modalAgregarAbierto, 'd-block': modalAgregarAbierto}" *ngIf="modalAgregarAbierto">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Agregar Empleado</h5>
+            <button type="button" class="btn-close" (click)="cerrarModalAgregar()"></button>
+          </div>
+          <div class="modal-body">
+            <form (ngSubmit)="agregarEmpleado()" #empleadoForm="ngForm">
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="empleadoSeleccionado.nombre" required pattern="[a-zA-Z]+">
+                <div *ngIf="empleadoForm.controls['nombre']?.invalid && (empleadoForm.controls['nombre']?.dirty || empleadoForm.controls['nombre']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['nombre']?.errors?.['required']">El nombre es obligatorio.</small>
+                  <small class="text-danger" *ngIf="empleadoForm.controls['nombre']?.errors?.['pattern']">El nombre solo puede contener letras y espacios.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="apPaterno" class="form-label">Apellido Paterno:</label>
+                <input type="text" class="form-control" id="apPaterno" name="apPaterno" [(ngModel)]="empleadoSeleccionado.apPaterno" required pattern="[a-zA-Z]+">
+                <div *ngIf="empleadoForm.controls['apPaterno']?.invalid && (empleadoForm.controls['apPaterno']?.dirty || empleadoForm.controls['apPaterno']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['apPaterno']?.errors?.['required']">El apellido paterno es obligatorio.</small>
+                  <small class="text-danger" *ngIf="empleadoForm.controls['apPaterno']?.errors?.['pattern']">El apellido paterno solo puede contener letras y sin espacios.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="apMaterno" class="form-label">Apellido Materno:</label>
+                <input type="text" class="form-control" id="apMaterno" name="apMaterno" [(ngModel)]="empleadoSeleccionado.apMaterno" pattern="[a-zA-Z]+">
+                <div *ngIf="empleadoForm.controls['apMaterno']?.invalid && (empleadoForm.controls['apMaterno']?.dirty || empleadoForm.controls['apMaterno']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['apMaterno']?.errors?.['pattern']">El apellido materno solo puede contener letras y sin espacios.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="rfc" class="form-label">RFC:</label>
+                <input type="text" class="form-control" id="rfc" name="rfc" [(ngModel)]="empleadoSeleccionado.rfc" (input)="convertirMayusculas('rfc')" required pattern="[A-Za-z0-9]{12}[0-9]">
+                <div *ngIf="empleadoForm.controls['rfc']?.invalid && (empleadoForm.controls['rfc']?.dirty || empleadoForm.controls['rfc']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['rfc']?.errors?.['required']">El RFC es obligatorio.</small>
+                  <small class="text-danger" *ngIf="empleadoForm.controls['rfc']?.errors?.['pattern']">El RFC debe tener 13 caracteres alfanuméricos y el último debe ser un número.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento:</label>
+                <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" [(ngModel)]="empleadoSeleccionado.fechaNacimiento" required [min]="fechaMinima" [max]="fechaMaxima">
+                <div *ngIf="empleadoForm.controls['fechaNacimiento']?.invalid && (empleadoForm.controls['fechaNacimiento']?.dirty || empleadoForm.controls['fechaNacimiento']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['fechaNacimiento']?.errors?.['required']">La fecha de nacimiento es obligatoria.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="curp" class="form-label">CURP:</label>
+                <input type="text" class="form-control" id="curp" name="curp" [(ngModel)]="empleadoSeleccionado.curp" (input)="convertirMayusculas('curp')" required pattern="[A-Za-z0-9]{17}[0-9]">
+                <div *ngIf="empleadoForm.controls['curp']?.invalid && (empleadoForm.controls['curp']?.dirty || empleadoForm.controls['curp']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['curp']?.errors?.['required']">La CURP es obligatoria.</small>
+                  <small class="text-danger" *ngIf="empleadoForm.controls['curp']?.errors?.['pattern']">La CURP debe tener 18 caracteres alfanuméricos y el último debe ser un número.</small>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cerrarModalAgregar()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" [disabled]="empleadoForm.invalid">Agregar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+  <!-- Modal Editar Empleado -->
+  <div class="modal fade" tabindex="-1" role="dialog" [ngClass]="{'show': modalEditarAbierto, 'd-block': modalEditarAbierto}" *ngIf="modalEditarAbierto">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Empleado</h5>
+            <button type="button" class="btn-close" (click)="cerrarModalEditar()"></button>
+          </div>
+          <div class="modal-body">
+            <form (ngSubmit)="actualizarEmpleado()" #empleadoForm="ngForm">
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="empleadoSeleccionado.nombre" required pattern="[a-zA-Z]+">
+                <div *ngIf="empleadoForm.controls['nombre']?.invalid && (empleadoForm.controls['nombre']?.dirty || empleadoForm.controls['nombre']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['nombre']?.errors?.['required']">El nombre es obligatorio.</small>
+                  <small class="text-danger" *ngIf="empleadoForm.controls['nombre']?.errors?.['pattern']">El nombre solo puede contener letras y espacios.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="apPaterno" class="form-label">Apellido Paterno:</label>
+                <input type="text" class="form-control" id="apPaterno" name="apPaterno" [(ngModel)]="empleadoSeleccionado.apPaterno" required pattern="[a-zA-Z]+">
+                <div *ngIf="empleadoForm.controls['apPaterno']?.invalid && (empleadoForm.controls['apPaterno']?.dirty || empleadoForm.controls['apPaterno']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['apPaterno']?.errors?.['required']">El apellido paterno es obligatorio.</small>
+                  <small class="text-danger" *ngIf="empleadoForm.controls['apPaterno']?.errors?.['pattern']">El apellido paterno solo puede contener letras y sin espacios.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="apMaterno" class="form-label">Apellido Materno:</label>
+                <input type="text" class="form-control" id="apMaterno" name="apMaterno" [(ngModel)]="empleadoSeleccionado.apMaterno" pattern="[a-zA-Z]+">
+                <div *ngIf="empleadoForm.controls['apMaterno']?.invalid && (empleadoForm.controls['apMaterno']?.dirty || empleadoForm.controls['apMaterno']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['apMaterno']?.errors?.['pattern']">El apellido materno solo puede contener letras y sin espacios.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="rfc" class="form-label">RFC:</label>
+                <input type="text" class="form-control" id="rfc" name="rfc" [(ngModel)]="empleadoSeleccionado.rfc" (input)="convertirMayusculas('rfc')" required pattern="[A-Za-z0-9]{12}[0-9]">
+                <div *ngIf="empleadoForm.controls['rfc']?.invalid && (empleadoForm.controls['rfc']?.dirty || empleadoForm.controls['rfc']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['rfc']?.errors?.['required']">El RFC es obligatorio.</small>
+                  <small class="text-danger" *ngIf="empleadoForm.controls['rfc']?.errors?.['pattern']">El RFC debe tener 13 caracteres alfanuméricos y el último debe ser un número.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento:</label>
+                <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" [(ngModel)]="empleadoSeleccionado.fechaNacimiento" required [min]="fechaMinima" [max]="fechaMaxima">
+                <div *ngIf="empleadoForm.controls['fechaNacimiento']?.invalid && (empleadoForm.controls['fechaNacimiento']?.dirty || empleadoForm.controls['fechaNacimiento']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['fechaNacimiento']?.errors?.['required']">La fecha de nacimiento es obligatoria.</small>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="curp" class="form-label">CURP:</label>
+                <input type="text" class="form-control" id="curp" name="curp" [(ngModel)]="empleadoSeleccionado.curp" (input)="convertirMayusculas('curp')" required pattern="[A-Za-z0-9]{17}[0-9]">
+                <div *ngIf="empleadoForm.controls['curp']?.invalid && (empleadoForm.controls['curp']?.dirty || empleadoForm.controls['curp']?.touched)">
+                  <small class="text-danger" *ngIf="empleadoForm.controls['curp']?.errors?.['required']">La CURP es obligatoria.</small>
+                  <small class="text-danger" *ngIf="empleadoForm.controls['curp']?.errors?.['pattern']">La CURP debe tener 18 caracteres alfanuméricos y el último debe ser un número.</small>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cerrarModalEditar()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" [disabled]="empleadoForm.invalid">Actualizar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+  <!-- Modal Eliminar Empleado -->
+  <div class="modal fade" tabindex="-1" role="dialog" [ngClass]="{'show': modalEliminarAbierto, 'd-block': modalEliminarAbierto}" *ngIf="modalEliminarAbierto">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar Empleado</h5>
+          <button type="button" class="btn-close" (click)="cerrarModalEliminar()"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas eliminar al empleado {{empleadoSeleccionado.nombre}} {{empleadoSeleccionado.apPaterno}} {{empleadoSeleccionado.apMaterno}}?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalEliminar()">Cancelar</button>
+          <button type="button" class="btn btn-danger" (click)="eliminarEmpleado()">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>

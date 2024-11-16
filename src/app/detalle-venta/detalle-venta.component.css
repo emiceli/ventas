@@ -1,0 +1,4 @@
+.right-btn {
+    float: right; /* Hace que el botón flote a la derecha */
+    margin-left: 10px; /* Ajusta el margen izquierdo según sea necesario */
+}
